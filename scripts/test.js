@@ -1,21 +1,31 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  // Replace with your actual deployed address
-  const contractAddress = "0x9a3DBCa554e9f6b9257aAa24010DA8377C57c17e";
+  const contractAddress = "0x2E1f232a9439C3D459FcEca0BeEf13acc8259Dd8";
   
   const ArtDIDRegistry = await ethers.getContractFactory("ArtDIDRegistry");
   const contract = ArtDIDRegistry.attach(contractAddress);
   
-  // Test setting a record
-  console.log("Setting CID record...");
-  const tx = await contract.setRecord("QmTest123456789");
-  await tx.wait();
-  console.log("Record set!");
+  const testCID = "QmTestArtwork1234";
   
-  // Test reading the record
-  const cid = await contract.getRecord("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73");
-  console.log("Retrieved CID:", cid);
+  console.log("\n1. Generating DID...");
+  const did = await contract.generateDID(testCID);
+  console.log("   CID:", testCID);
+  console.log("   DID:", did);
+  
+  console.log("\n2. Checking if registered...");
+  const existsBefore = await contract.hasRecord(did);
+  console.log("   Already registered:", existsBefore);
+  
+  console.log("\n3. Registering artwork...");
+  const tx = await contract.setRecord(testCID);
+  await tx.wait();
+  console.log("   ✅ Artwork registered!");
+  
+  console.log("\n4. Retrieving record...");
+  const retrievedCID = await contract.getRecord(did);
+  console.log("   Retrieved CID:", retrievedCID);
+  console.log("   ✅ Match:", retrievedCID === testCID);
 }
 
 main().catch(console.error);
