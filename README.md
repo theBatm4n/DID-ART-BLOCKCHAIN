@@ -33,5 +33,5 @@ curl -X POST http://localhost:8545 \
 npx hardhat compile
 npx hardhat run scripts/deploy.js --network besu
 
-# 5. Run tests
+# 5. Run tests (make sure to change the contract address with the result from the previous command)
 npx hardhat run scripts/test.js --network besu
