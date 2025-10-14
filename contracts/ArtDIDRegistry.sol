@@ -32,9 +32,7 @@ contract ArtDIDRegistry{
         return bytes(didRecords[did]).length > 0;
     }
 
-    /**
-     * Convert bytes32 to hex string
-     */
+    //Convert bytes32 to hex string
     function toHexString(bytes32 value) internal pure returns (string memory) {
         bytes memory alphabet = "0123456789abcdef";
         bytes memory str = new bytes(64); 

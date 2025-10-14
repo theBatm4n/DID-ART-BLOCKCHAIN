@@ -20,12 +20,12 @@ async function main() {
   console.log("\n3. Registering artwork...");
   const tx = await contract.setRecord(testCID);
   await tx.wait();
-  console.log("   ✅ Artwork registered!");
+  console.log("   Artwork registered!");
   
   console.log("\n4. Retrieving record...");
   const retrievedCID = await contract.getRecord(did);
   console.log("   Retrieved CID:", retrievedCID);
-  console.log("   ✅ Match:", retrievedCID === testCID);
+  console.log("    Match:", retrievedCID === testCID);
 }
 
 main().catch(console.error);
