@@ -16,7 +16,8 @@ git clone <your-repo>
 cd art-did-demo
 npm install
 
-# 2. Start Besu blockchain
+# 2. Pull Besu image and Start Besu blockchain
+docker pull hyperledger/besu:latest
 docker run -d -p 8545:8545 --name besu-demo \
   hyperledger/besu:latest \
   --network=dev --miner-enabled \
