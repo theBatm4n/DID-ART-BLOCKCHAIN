@@ -13,7 +13,7 @@ A decentralized identity system for art credentials using DLT Besu blockchain.
 ```bash
 # 1. Clone and install
 git clone https://github.com/theBatm4n/DID-ART-BLOCKCHAIN.git
-cd did-art-blockchain
+cd DID-ART-BLOCKCHAIN
 npm install
 
 # 2. Pull Besu image and Start Besu blockchain
