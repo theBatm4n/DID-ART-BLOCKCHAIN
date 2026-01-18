@@ -3,44 +3,79 @@ pragma solidity ^0.8.19;
 
 contract ArtDIDRegistry{
 
-    // DID identifier -> Artwork CID
-    mapping(string => string) public didRecords;
-
-    //Event for tracking record changes 
-    event RecordSet(string indexed did, string cid, address indexed identity, uint256 timestamp);
-
-    function setRecord(string memory cid) public{
-        string memory did = generateDID(cid);
-
-        //Check if already registered
-        require(bytes(didRecords[did]).length == 0, "Artwork already registered");
-
-        didRecords[did] = cid;
-        emit RecordSet(did, cid, msg.sender, block.timestamp);
+    struct ArtworkRecord {
+        string cid;
+        uint256 created_at;
+        uint256 updated_at;
+        address creator;
     }
 
-    function generateDID(string memory cid) public pure returns (string memory) {
-        bytes32 hash = keccak256(abi.encodePacked(cid));
-        return toHexString(hash);
+    // DID identifier -> Artwork CID
+    mapping(bytes32 => ArtworkRecord) public didRecords;
+
+    //Event for tracking record changes 
+    event RecordSet(
+        bytes32 indexed did, 
+        string cid, 
+        address indexed identity, 
+        uint256 created_at,
+        uint256 updated_at
+    );
+
+    event RecordUpdated(
+        bytes32 indexed did,
+        string newCid,
+        address indexed updater,
+        uint256 updated_at
+    );
+
+    
+    function setRecord(string memory cid) public returns (bytes32) {
+        require(bytes(cid).length > 0, "CID cannot be empty");
+        bytes32 did = generateDID(cid);
+        require(bytes(didRecords[did].cid).length == 0, "Artwork already registered");
+        
+        didRecords[did] = ArtworkRecord({
+            cid: cid,
+            created_at: block.timestamp,
+            updated_at: block.timestamp,
+            creator: msg.sender
+        });
+        
+        emit RecordSet(did, cid, msg.sender, block.timestamp, block.timestamp);
+        return did;
+    }
+
+    function updateRecord(string memory oldCid, string memory newCid) public {
+        bytes32 did = generateDID(oldCid);
+        require(bytes(didRecords[did].cid).length > 0, "Record not found");
+        require(didRecords[did].creator == msg.sender, "Only creator can update");
+        
+        didRecords[did].cid = newCid;
+        didRecords[did].updated_at = block.timestamp;
+        
+        emit RecordUpdated(did, newCid, msg.sender, block.timestamp);
+    }
+
+    function generateDID(string memory cid) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(cid));
     } 
 
-    function getRecord(string memory did) public view returns(string memory){
+    function getRecord(bytes32 did) public view returns (
+        string memory cid,
+        uint256 created_at,
+        uint256 updated_at,
+        address creator
+    ) {
+        ArtworkRecord memory record = didRecords[did];
+        return (record.cid, record.created_at, record.updated_at, record.creator);
+    }
+    
+    function getFullRecord(bytes32 did) public view returns (ArtworkRecord memory) {
         return didRecords[did];
     }
 
-    function hasRecord(string memory did) public view returns (bool){
-        return bytes(didRecords[did]).length > 0;
-    }
-
-    //Convert bytes32 to hex string
-    function toHexString(bytes32 value) internal pure returns (string memory) {
-        bytes memory alphabet = "0123456789abcdef";
-        bytes memory str = new bytes(64); 
-        
-        for (uint256 i = 0; i < 32; i++) {
-            str[i * 2] = alphabet[uint8(value[i] >> 4)];
-            str[i * 2 + 1] = alphabet[uint8(value[i] & 0x0f)];
-        }
-        return string(str);
+    function hasRecord(bytes32 did) public view returns (bool){
+        return bytes(didRecords[did].cid).length > 0;
     }
 }
